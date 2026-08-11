@@ -89,11 +89,12 @@ if current_phase > (disturbance_period - 1)
     disturbance_phi = disturbance_phi_amplitude*sin(2*pi*2*t);
 end
 
-% 扰动向量 - 修正了公式中的错误（原代码中使用了lf*cf和lf*cr，应该是lr*cr）
+% 物理车辆动力学中的外部扰动。
+% 道路曲率只通过上面的误差运动学进入，不在 v_y、omega_z 动力学中重复加入。
 D = [0;
      0;
-     -((lf*cf - lr*cr)/m + vx^2)*rho_0 + disturbance_y;
-     -((lf^2*cf + lr^2*cr)/Iz)*rho_0 + disturbance_phi];
+     disturbance_y;
+     disturbance_phi];
 
 % 侧向速度和横摆角速度的动力学。
 dv_y = A11*v_y + A12*omega_z + B1*delta_sat + D(3);
