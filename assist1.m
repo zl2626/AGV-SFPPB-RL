@@ -1,8 +1,7 @@
 function [sys,x0,str,ts] = assist1(t,x,u,flag)
 % ASSIST1  输入饱和补偿状态 rho。
-% 输出的是两个状态：[rho; rho_dot]。
-% rho_dot 先经过一个连续一阶滤波状态，避免 rho_dot 直接把
-% delta -> SFPPB -> delta 连成代数环。
+% 内部状态为 [rho_c; rho]：rho_c 是饱和驱动的放松指令，rho 是平滑状态。
+% 输出 [rho;rho_dot]，其中 rho_dot 始终由同一个 rho 状态方程计算。
 
 switch flag
     case 0
@@ -51,29 +50,35 @@ end
 function sys = mdlDerivatives(~,x,u)
 global u_d p1 p2 rho_filter_tau
 
-rho = max(x(1),0);
+% 两层连续状态：先得到饱和驱动的指令 rho_c，再滤波得到 rho。
+rho_c = max(x(1),0);
+rho = max(x(2),0);
 delta = u(1);
 
 % 论文中的两个饱和超限项。
 varpi1 = (sign(delta-u_d)+1)*(delta-u_d);
 varpi2 = (sign(delta+u_d)-1)*(delta+u_d);
 
-d_rho = -p1*rho+p2*(varpi1+varpi2);
-if x(1) <= 0 && d_rho < 0
-    d_rho = 0;
+rho_c_dot = -p1*rho_c+p2*(varpi1+varpi2);
+if x(1) <= 0 && rho_c_dot < 0
+    rho_c_dot = 0;
 end
 
-rho_dot = x(2);
-d_rho_dot = (d_rho-rho_dot)/rho_filter_tau;
+% 这里的 rho_dot 就是 rho 的真实导数，供 SFPPB 边界导数使用。
+rho_dot = (rho_c-rho)/rho_filter_tau;
 
-sys = [d_rho;d_rho_dot];
+sys = [rho_c_dot;rho_dot];
 end
 
 function sys = mdlOutputs(x)
 
-rho = max(x(1),0);
-rho_dot = x(2);
-if x(1) <= 0 && rho_dot < 0
+global rho_filter_tau
+rho_c = max(x(1),0);
+rho = max(x(2),0);
+rho_dot = (rho_c-rho)/rho_filter_tau;
+
+% rho_c 和 rho 从零开始且 rho_c 非负，因此 rho 不会穿过零点。
+if x(2) <= 0 && rho_dot < 0
     rho_dot = 0;
 end
 
