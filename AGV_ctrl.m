@@ -168,8 +168,9 @@ S_J2 = AGV_RBF([Z_F;s2],'J');
 F2_hat = WF2'*S_F2;
 
 % 第二层动力学中的-alpha1_dot现在由滤波器显式给出。
-% F2_hat只需辨识剩余未知项，PI积分项仍为K2*z2。
-F2_PI = F2_hat-dalpha1_f+K2.*z2;
+% 由 z2=chi2-alpha1_f-O 可知，-dot(O)在漂移项中留下明确的 +O。
+% F2_hat只辨识车辆第二层的未知剩余项，PI积分项为K2*z2。
+F2_PI = F2_hat-dalpha1_f+O+K2.*z2;
 
 % 车辆真实输入增益。plant使用同一个物理输入矩阵，不能只保留方向。
 cf = cf0*(1+cf_rate*sin(0.01*t));
@@ -181,8 +182,9 @@ p_a2 = 2*C2.*s2+2*F2_PI+WA2'*S_J2;
 delta_feedback = -(C'*p_a2)/(2*r_delta);
 delta_feedforward = rho_ff_gain*rho_0; % 车辆模型的曲率前馈系数
 delta = delta_feedback+delta_feedforward;
-delta_smooth = u_d*tanh(delta/u_d);
-dO = -O+C*(delta_smooth-delta);
+delta_sat = min(max(delta,-u_d),u_d);
+% O 使用与 Plant 完全相同的实际执行输入，保证饱和项在 dot(z2) 中抵消。
+dO = -O+C*(delta_sat-delta);
 
 % ------------------------- 权重更新 --------------------------
 if learning_on
@@ -257,7 +259,7 @@ s2 = z2+K2.*I2;
 S_F2 = AGV_RBF(Z_F,'F');
 S_J2 = AGV_RBF([Z_F;s2],'J');
 F2_hat = WF2'*S_F2;
-F2_PI = F2_hat-dalpha1_f+K2.*z2;
+F2_PI = F2_hat-dalpha1_f+O+K2.*z2;
 
 % 车辆真实输入增益和最终控制量
 cf = cf0*(1+cf_rate*sin(0.01*t));
