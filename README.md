@@ -128,18 +128,17 @@ F2(X,t)  = dot(chi2) - C(t)*delta_sat
 
 ## 结果
 
-基准工况（`u_d=0.5`，20 s，默认物理扰动）本次结果为：
+结构审计后的基准工况（`u_d=0.5`，20 s，默认物理扰动）结果为：
 
 ```text
-RMS(e_y)       = 0.0205957 m
-RMS(e_phi)     = 0.00184740 rad
-RMS_delta_dot  = 0.0286923 rad/s
-TV_delta       = 0.152832 rad
-T_sat          = 0 s
+RMS(e_y)       = 0.0144101 m
+RMS(e_phi)     = 0.00124570 rad
+RMS_delta_dot  = 1.13616 rad/s
+TV_delta       = 1.10411 rad
+T_sat          = 0.000823001 s
 ```
 
-本次最终参数是在候选参数范围内同时比较 nominal、压力饱和和 U 形工况后选定的综合结果：
-`rho_ff_gain=4.6`，其余 PI、RL 和饱和补偿参数保持代码顶部的默认值。
+本轮结构审计没有重新调参，沿用此前综合比较得到的 `rho_ff_gain=4.6`，其余 PI、RL 和饱和补偿参数保持代码顶部默认值。
 
 饱和验证工况可在 MATLAB 中设置唯一的 `u_d`：
 
@@ -154,14 +153,17 @@ out = sim('AGV_simulate','StopTime','20','ReturnWorkspaceOutputs','on');
 恢复默认工况时执行 `clear global u_d` 后重新运行。
 
 这是单独的压力测试背景：两个扰动数值虽然都写成 18，但在代码中分别对应 `m/s^2` 和 `rad/s^2`，默认工况不会使用它们。
-当前 `u_d=0.3` 压力测试完整通过，饱和持续约 `1.4367 s`，结果图为 `fig3/sfppb_pi_sat03_01~13`。
+当前 `u_d=0.3` 压力测试完整通过，结构审计后的饱和持续约 `1.29587 s`，结果图为 `fig3/sfppb_pi_sat03_01~13`。
 
 ```text
 结果状态          = Pass（无 BoundaryViolation）
-T_sat             ≈ 1.4367 s
+RMS(e_y)          ≈ 0.151699 m
+RMS(e_phi)        ≈ 0.0151624 rad
+T_sat             ≈ 1.29587 s
+min boundary gap  ≈ 0.0782158
 ```
 
-U 形工况的记录结果为 `RMS(e_y)=0.03517 m`、`RMS(e_phi)=0.003107 rad`，全程无饱和、无边界越界；Figure 13 中红色虚线是参考半圆，蓝色实线是实际 AGV 轨迹。
+U 形工况的记录结果为 `RMS(e_y)=0.0243406 m`、`RMS(e_phi)=0.00160504 rad`、`T_sat≈0.000823001 s`，无边界越界；Figure 13 中红色虚线是参考半圆，蓝色实线是实际 AGV 轨迹。
 
 默认代码已恢复为 `u_d=0.5`。`AGV_plot.m` 的 Figure 12 现在绘制真正的柔性辅助状态 `rho`，Figure 10 单独绘制道路曲率 `rho_0`。
 
