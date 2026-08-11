@@ -76,7 +76,14 @@ xi1 = zeta1 + K1*I1,  dot(I1)=zeta1
 xi2 = zeta2 + K2*I2,  dot(I2)=zeta2
 ```
 
-Critic/Actor 输入必须包含足够状态使 PI 动力学闭合。第一层至少使用 `[Z_F;zeta1;I1]`，第二层至少使用 `[Z_F;zeta2;I2;O]`；若滤波误差进入价值函数，则额外包含 `alpha1_f`。RBF 基函数维数和中心随此接口显式更新，不再把 `s1/s2` 单独当作完整 Markov 状态。
+Critic/Actor 输入必须包含足够状态使 PI 动力学闭合。采用
+
+```text
+Z_J1 = [Z_F;zeta1;I1]
+Z_J2 = [Z_F;zeta1;I1;zeta2;I2;O;alpha1_f]
+```
+
+第二层保留第一层状态，因为 `dot(alpha1_f)` 由第一层虚拟控制产生。边界调度量作为已知时变系数进入当前动力学；完整时间扩展 HJB 仍需在稳定性阶段单独证明。RBF 基函数维数和中心随此接口显式更新，不再把 `s1/s2` 单独当作完整 Markov 状态。
 
 ### 阶段 6：第二层未知函数与输入增益假设
 

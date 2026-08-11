@@ -82,6 +82,15 @@ F2_PI = F2_hat - alpha1_f_dot + K2.*z2;
 p_a2 = 2*C2.*s2 + 2*F2_PI + WA2'*S_J2;
 ```
 
+Critic/Actor 不再只把 `s1/s2` 当成完整状态。当前网络输入显式包含 PI 积分状态：
+
+```text
+Z_J1 = [Z_F; z1; I1]
+Z_J2 = [Z_F; z1; I1; z2; I2; O; alpha1_f]
+```
+
+这样不同的 `(z1,I1)` 或 `(z2,I2)` 不会被同一个 `s1/s2` 混成同一 Markov 状态；时间变化的性能边界仍需在完整 HJB 推导中显式处理。
+
 ## 物理输入增益
 
 `AGV_ctrl.m` 和 `AGV_plant.m` 使用同一个物理输入增益：

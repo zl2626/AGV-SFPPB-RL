@@ -146,7 +146,8 @@ K2 = [k2y;k2phi];
 
 % ------------------------- 第一层 ----------------------------
 s1 = z1+K1.*I1;
-S_J1 = AGV_RBF([Z_F;s1],'J');
+Z_J1 = [Z_F;z1;I1];
+S_J1 = AGV_RBF(Z_J1,'J1');
 % NMT给出 dot(z1)=varsigma*chi2-Gamma，第一层没有需要辨识的未知函数。
 F1_hat = zeros(2,1);
 alpha1 = varsigma\(-C1.*s1+Gamma-K1.*z1-F1_hat-0.5*WA1'*S_J1);
@@ -158,7 +159,8 @@ dalpha1_f = (alpha1-alpha1_f)/tau_alpha1;
 z2 = chi2-alpha1_f-O;
 s2 = z2+K2.*I2;
 S_F2 = AGV_RBF(Z_F,'F');
-S_J2 = AGV_RBF([Z_F;s2],'J');
+Z_J2 = [Z_F;z1;I1;z2;I2;O;alpha1_f];
+S_J2 = AGV_RBF(Z_J2,'J2');
 F2_hat = WF2'*S_F2;
 
 % 第二层动力学中的-alpha1_dot现在由滤波器显式给出。
@@ -237,7 +239,8 @@ K2 = [k2y;k2phi];
 
 % 第一层 PI 和 RBF
 s1 = z1+K1.*I1;
-S_J1 = AGV_RBF([Z_F;s1],'J');
+Z_J1 = [Z_F;z1;I1];
+S_J1 = AGV_RBF(Z_J1,'J1');
 F1_hat = zeros(2,1);
 alpha1 = varsigma\(-C1.*s1+Gamma-K1.*z1-F1_hat-0.5*WA1'*S_J1);
 
@@ -247,7 +250,8 @@ dalpha1_f = (alpha1-alpha1_f)/tau_alpha1;
 z2 = chi2-alpha1_f-O;
 s2 = z2+K2.*I2;
 S_F2 = AGV_RBF(Z_F,'F');
-S_J2 = AGV_RBF([Z_F;s2],'J');
+Z_J2 = [Z_F;z1;I1;z2;I2;O;alpha1_f];
+S_J2 = AGV_RBF(Z_J2,'J2');
 F2_hat = WF2'*S_F2;
 F2_PI = F2_hat-dalpha1_f+O+K2.*z2;
 

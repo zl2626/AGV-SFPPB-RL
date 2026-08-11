@@ -197,7 +197,7 @@ git commit -m "remove undefined first-layer identifier"
 - Test: direct basis-dimension checks and three regression scenarios
 
 **Interfaces:**
-- Consumes: `[Z_F,z1,I1]` for layer 1 and `[Z_F,z2,I2,O,alpha1_f]` for layer 2.
+- Consumes: `[Z_F,z1,I1]` for layer 1 and `[Z_F,z1,I1,z2,I2,O,alpha1_f]` for layer 2.
 - Produces: basis vectors whose input contains every integral/filter state used by the control dynamics.
 
 - [ ] **Step 1: Run the failing Markov closure check**
@@ -206,7 +206,7 @@ Hold `Z_F` and `s1` fixed while changing `I1`; verify that the current J input i
 
 - [ ] **Step 2: Add the missing states explicitly**
 
-Use separate state vectors for the two networks and update `AGV_RBF` dimensions/centers rather than silently reusing the old six-dimensional J basis.
+Use `Z_J1=[Z_F;z1;I1]` and `Z_J2=[Z_F;z1;I1;z2;I2;O;alpha1_f]`; update `AGV_RBF` dimensions/centers rather than silently reusing the old six-dimensional J basis.
 
 - [ ] **Step 3: Run basis-size and finite-output checks**
 
