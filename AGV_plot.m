@@ -26,7 +26,7 @@ z2phi = out.z2phi;
 delta = out.delta;
 delta1 = out.delta1;
 W = out.W;
-w = out.w;
+rho_transform = out.rho_transform;
 rho_0_signal = out.rho_0;
 if isa(rho_0_signal,'timeseries')
     rho_0_data = rho_0_signal.Data(:);
@@ -50,16 +50,11 @@ elseif isempty(t_rho)
 end
 
 % 方向盘饱和上限，与 AGV_ctrl.m 保持一致。
-% 如果命令行已经设置 global u_d，就直接使用它；也可用 u_d_plot 覆盖。
-if ~exist('u_d_plot','var')
-    global u_d
-    if isempty(u_d)
-        u_d_plot = 0.5;
-    else
-        u_d_plot = u_d;
-    end
+% 每次直接读取当前工况的 global u_d，避免连续画图时沿用上一个工况的阈值。
+global u_d
+if isempty(u_d)
+    u_d = 0.5;
 end
-u_d = u_d_plot;
 
 % 在固定时间网格上计算方向盘平滑性，避免variable-step采样影响结果。
 t_fixed = linspace(0,simulation_time,numel(t)).';
@@ -200,10 +195,10 @@ setYLim(rho_0_data);
 % Figure 11：扰动和权重范数分开显示，避免混用物理量纲。
 figure(11);
 subplot(2,1,1);
-plot(t,w,'r','linewidth',2);
+plot(t,rho_transform,'m','linewidth',2);
 xlabel('Time (sec)','FontSize', 14);
-ylabel('$w$','FontSize', 14, 'Interpreter', 'latex');
-grid on; xlim([0,simulation_time]); setYLim(w);
+ylabel('$\rho$ (SFPPB)','FontSize', 14, 'Interpreter', 'latex');
+grid on; xlim([0,simulation_time]); setYLim(rho_transform);
 subplot(2,1,2);
 plot(t,W,'b','linewidth',2);
 xlabel('Time (sec)','FontSize', 14);

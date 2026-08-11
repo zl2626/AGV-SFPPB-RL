@@ -25,16 +25,19 @@ N = 7;
 
 % PI 参数：s1=z1+K1*I1，s2=z2+K2*I2
 global k1y k1phi k2y k2phi
-global tau_alpha1 vx_vehicle
-k1y = 0.10;                         % 第一层横向误差积分系数
-k1phi = 0.20;                       % 第一层航向误差积分系数
-k2y = 0.01;                         % 第二层横向误差积分系数
-k2phi = 0.01;                       % 第二层航向误差积分系数
+global tau_alpha1 vx_vehicle rho_ff_gain
+if isempty(k1y), k1y = 0.10; end   % 第一层横向误差积分系数
+if isempty(k1phi), k1phi = 0.20; end % 第一层航向误差积分系数
+if isempty(k2y), k2y = 0.01; end   % 第二层横向误差积分系数
+if isempty(k2phi), k2phi = 0.01; end % 第二层航向误差积分系数
 if isempty(tau_alpha1)
     tau_alpha1 = 0.01;              % 虚拟控制一阶滤波时间常数(s)
 end
 if isempty(vx_vehicle)
     vx_vehicle = 20;                % 纵向速度(m/s)
+end
+if isempty(rho_ff_gain)
+    rho_ff_gain = 4.6;              % 道路曲率前馈系数（当前综合最优）
 end
 
 % 两层控制器参数
@@ -117,7 +120,7 @@ global k1y k1phi k2y k2phi
 global tau_alpha1
 global Upsilon1 Upsilon2 sigma1 sigma2
 global gamma_c1 gamma_c2 gamma_a1 gamma_a2 learning_on
-global u_d m Iz lf lr cf0 cf_rate r_delta
+global u_d m Iz lf lr cf0 cf_rate r_delta rho_ff_gain
 
 % ------------------------- 解包状态 --------------------------
 i = 0;
@@ -176,7 +179,7 @@ C = C_physical;
 % 方向盘控制量和输入饱和补偿状态
 p_a2 = 2*C2.*s2+2*F2_PI+WA2'*S_J2;
 delta_feedback = -(C'*p_a2)/(2*r_delta);
-delta_feedforward = 5.2*rho_0;    % 车辆模型的曲率前馈系数
+delta_feedforward = rho_ff_gain*rho_0; % 车辆模型的曲率前馈系数
 delta = delta_feedback+delta_feedforward;
 delta_smooth = u_d*tanh(delta/u_d);
 dO = -O+C*(delta_smooth-delta);
@@ -211,7 +214,7 @@ function sys = mdlOutputs(t,x,u)
 global N c1y c1phi c2y c2phi
 global k1y k1phi k2y k2phi
 global tau_alpha1
-global u_d m Iz lf lr cf0 cf_rate r_delta
+global u_d m Iz lf lr cf0 cf_rate r_delta rho_ff_gain
 
 % ------------------------- 解包状态 --------------------------
 i = 0;
@@ -262,7 +265,7 @@ C_physical = [cf/m;lf*cf/Iz];
 C = C_physical;
 p_a2 = 2*C2.*s2+2*F2_PI+WA2'*S_J2;
 delta_feedback = -(C'*p_a2)/(2*r_delta);
-delta_feedforward = 5.2*rho_0;    % 车辆模型的曲率前馈系数
+delta_feedforward = rho_ff_gain*rho_0; % 车辆模型的曲率前馈系数
 delta = delta_feedback+delta_feedforward;
 delta_sat = min(max(delta,-u_d),u_d);
 

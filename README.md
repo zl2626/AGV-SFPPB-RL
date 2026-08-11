@@ -94,7 +94,7 @@ delta = -(C'*p_a2)/(2*r_delta);
 ```
 
 曲线路径的第 13 路输入是 `rho_0`，控制器增加简单的车辆曲率前馈
-`delta_feedforward = 5.2*rho_0`；直线路径时该项为零。
+`delta_feedforward = rho_ff_gain*rho_0`，当前默认 `rho_ff_gain=4.6`；直线路径时该项为零。
 
 控制器输出 `delta` 和唯一一次饱和后的 `delta_sat`，Simulink 将 `delta_sat` 送入 plant，plant 不再重复设置第二个饱和上限。
 
@@ -107,13 +107,15 @@ delta = -(C'*p_a2)/(2*r_delta);
 基准工况（`u_d=0.5`，20 s，默认物理扰动）本次结果为：
 
 ```text
-RMS(e_y)       = 0.0205843 m
-RMS(e_phi)     = 0.00184732 rad
-max |delta|    = 0.264762 rad
-RMS_delta_dot  = 0.0281441 rad/s
-TV_delta       = 0.153974 rad
+RMS(e_y)       = 0.0205957 m
+RMS(e_phi)     = 0.00184740 rad
+RMS_delta_dot  = 0.0286923 rad/s
+TV_delta       = 0.152832 rad
 T_sat          = 0 s
 ```
+
+本次最终参数是在候选参数范围内同时比较 nominal、压力饱和和 U 形工况后选定的综合结果：
+`rho_ff_gain=4.6`，其余 PI、RL 和饱和补偿参数保持代码顶部的默认值。
 
 饱和验证工况可在 MATLAB 中设置唯一的 `u_d`：
 
@@ -128,11 +130,11 @@ out = sim('AGV_simulate','StopTime','20','ReturnWorkspaceOutputs','on');
 恢复默认工况时执行 `clear global u_d` 后重新运行。
 
 这是单独的压力测试背景：两个扰动数值虽然都写成 18，但在代码中分别对应 `m/s^2` 和 `rad/s^2`，默认工况不会使用它们。
-当前 `u_d=0.3` 压力测试完整通过，饱和持续约 `1.44 s`，结果图为 `fig3/sfppb_pi_sat03_01~13`。
+当前 `u_d=0.3` 压力测试完整通过，饱和持续约 `1.4367 s`，结果图为 `fig3/sfppb_pi_sat03_01~13`。
 
 ```text
 结果状态          = Pass（无 BoundaryViolation）
-T_sat             ≈ 1.44 s
+T_sat             ≈ 1.4367 s
 ```
 
 U 形工况的记录结果为 `RMS(e_y)=0.03517 m`、`RMS(e_phi)=0.003107 rad`，全程无饱和、无边界越界；Figure 13 中红色虚线是参考半圆，蓝色实线是实际 AGV 轨迹。
