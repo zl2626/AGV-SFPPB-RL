@@ -163,12 +163,15 @@ Z_J2 = [Z_F;z1;I1;z2;I2;O;alpha1_f];
 S_J2 = AGV_RBF(Z_J2,'J2');
 F2_hat = WF2'*S_F2;
 
+% 输入增益假设：dot(chi2)=F2(X,t)+C(t)*delta_sat。
+% F2 是去掉实际转向输入后的车辆第二层漂移，包含轮胎漂移、外部扰动、
+% rho_0及其滤波状态引起的项；WF2 只逼近这个 F2，不承担 O、PI 或滤波项。
 % 第二层动力学中的-alpha1_dot现在由滤波器显式给出。
 % 由 z2=chi2-alpha1_f-O 可知，-dot(O)在漂移项中留下明确的 +O。
 % F2_hat只辨识车辆第二层的未知剩余项，PI积分项为K2*z2。
 F2_PI = F2_hat-dalpha1_f+O+K2.*z2;
 
-% 车辆真实输入增益。plant使用同一个物理输入矩阵，不能只保留方向。
+% 已知时变输入增益：Controller 与 Plant 使用同一个 cf(t) 和 C(t)。
 cf = cf0*(1+cf_rate*sin(0.01*t));
 C_physical = [cf/m;lf*cf/Iz];
 C = C_physical;
@@ -252,6 +255,7 @@ s2 = z2+K2.*I2;
 S_F2 = AGV_RBF(Z_F,'F');
 Z_J2 = [Z_F;z1;I1;z2;I2;O;alpha1_f];
 S_J2 = AGV_RBF(Z_J2,'J2');
+% 与 mdlDerivatives 相同：F2_hat 只表示 dot(chi2)-C(t)*delta_sat。
 F2_hat = WF2'*S_F2;
 F2_PI = F2_hat-dalpha1_f+O+K2.*z2;
 

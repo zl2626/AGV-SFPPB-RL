@@ -102,6 +102,15 @@ r_delta = norm([cf0/m; lf*cf0/Iz]);
 delta = -(C'*p_a2)/(2*r_delta);
 ```
 
+本工程明确采用“已知时变输入增益”假设：
+
+```text
+dot(chi2) = F2(X,t) + C(t)*delta_sat
+F2(X,t)  = dot(chi2) - C(t)*delta_sat
+```
+
+因此 Controller 和 Plant 使用同一个 `cf(t)` 与 `C(t)`。`F2` 包含去掉实际转向输入后的轮胎漂移、外部扰动、道路曲率滤波状态及未建模耦合；`WF2` 只逼近这个 `F2`，不承担 `O`、PI 或虚拟控制滤波项。当前 `Z_F` 是可测的简化回归量；将所有未知参数和完整外部状态纳入严格闭合的 Identifier 仍属于 `THEORY GAP`。
+
 曲线路径的第 13 路输入是 `rho_0`，控制器增加简单的车辆曲率前馈
 `delta_feedforward = rho_ff_gain*rho_0`，当前默认 `rho_ff_gain=4.6`；直线路径时该项为零。
 
