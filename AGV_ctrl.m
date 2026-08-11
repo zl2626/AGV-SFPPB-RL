@@ -56,12 +56,10 @@ if isempty(c2phi)
 end
 
 % RBF 自适应参数
-global Upsilon1 Upsilon2 sigma1 sigma2
+global Upsilon2 sigma2
 global gamma_c1 gamma_c2 gamma_a1 gamma_a2
 global learning_on
-Upsilon1 = 0.04;                    % 第一层辨识增益
 Upsilon2 = 0.04;                    % 第二层辨识增益
-sigma1 = 0.08;                      % 第一层泄漏系数
 sigma2 = 0.08;                      % 第二层泄漏系数
 gamma_c1 = 0.004;                   % 第一层 Critic 增益
 gamma_c2 = 0.004;                   % 第二层 Critic 增益
@@ -86,7 +84,7 @@ r_delta = norm([cf0/m;lf*cf0/Iz]);   % HJB转向输入代价权重
 
 % S-function 接口
 sizes = simsizes;
-sizes.NumContStates  = 12*N+8;
+sizes.NumContStates  = 10*N+8;
 sizes.NumDiscStates  = 0;
 sizes.NumOutputs     = 9;
 sizes.NumInputs      = 13;
@@ -94,10 +92,9 @@ sizes.DirFeedthrough = 1;
 sizes.NumSampleTimes = 1;
 sys = simsizes(sizes);
 
-% 状态顺序：[WF1;WC1;WA1;WF2;WC2;WA2;O;alpha1_f;I1;I2]
+% 状态顺序：[WC1;WA1;WF2;WC2;WA2;O;alpha1_f;I1;I2]
 W0 = 0.4;
 w0 = W0*[-1;-1;-1;0;1;1;1];
-WF10 = repmat(w0,1,2);
 WC10 = repmat(w0,1,2);
 WA10 = repmat(w0,1,2);
 WF20 = repmat(w0,1,2);
@@ -107,7 +104,7 @@ O0 = zeros(2,1);
 alpha10 = zeros(2,1);
 I10 = zeros(2,1);
 I20 = zeros(2,1);
-x0 = [WF10(:);WC10(:);WA10(:);WF20(:);WC20(:);WA20(:);O0;alpha10;I10;I20];
+x0 = [WC10(:);WA10(:);WF20(:);WC20(:);WA20(:);O0;alpha10;I10;I20];
 
 str = [];
 ts = [0 0];
@@ -118,13 +115,12 @@ function sys = mdlDerivatives(t,x,u)
 global N c1y c1phi c2y c2phi
 global k1y k1phi k2y k2phi
 global tau_alpha1
-global Upsilon1 Upsilon2 sigma1 sigma2
+global Upsilon2 sigma2
 global gamma_c1 gamma_c2 gamma_a1 gamma_a2 learning_on
 global u_d m Iz lf lr cf0 cf_rate r_delta rho_ff_gain
 
 % ------------------------- 解包状态 --------------------------
 i = 0;
-WF1 = reshape(x(i+1:i+2*N),N,2); i = i+2*N;
 WC1 = reshape(x(i+1:i+2*N),N,2); i = i+2*N;
 WA1 = reshape(x(i+1:i+2*N),N,2); i = i+2*N;
 WF2 = reshape(x(i+1:i+2*N),N,2); i = i+2*N;
@@ -150,11 +146,9 @@ K2 = [k2y;k2phi];
 
 % ------------------------- 第一层 ----------------------------
 s1 = z1+K1.*I1;
-S_F1 = AGV_RBF(Z_F,'F');
 S_J1 = AGV_RBF([Z_F;s1],'J');
-% AGV第一层理想运动学是已知的；WF1当前只保留作未建模耦合项的保守估计，
-% 论文中仍需明确说明它对应的未知项，而不能把它当成自动成立的F1。
-F1_hat = WF1'*S_F1;
+% NMT给出 dot(z1)=varsigma*chi2-Gamma，第一层没有需要辨识的未知函数。
+F1_hat = zeros(2,1);
 alpha1 = varsigma\(-C1.*s1+Gamma-K1.*z1-F1_hat-0.5*WA1'*S_J1);
 
 % 用连续滤波器承接虚拟控制，显式得到dot(alpha1_f)。
@@ -188,14 +182,12 @@ dO = -O+C*(delta_sat-delta);
 
 % ------------------------- 权重更新 --------------------------
 if learning_on
-    dWF1 = Upsilon1*(S_F1*s1'-sigma1*WF1);
     dWF2 = Upsilon2*(S_F2*s2'-sigma2*WF2);
     dWC1 = -gamma_c1*(S_J1*S_J1')*WC1;
     dWC2 = -gamma_c2*(S_J2*S_J2')*WC2;
     dWA1 = -(S_J1*S_J1')*(gamma_a1*(WA1-WC1)+gamma_c1*WC1);
     dWA2 = -(S_J2*S_J2')*(gamma_a2*(WA2-WC2)+gamma_c2*WC2);
 else
-    dWF1 = zeros(size(WF1));
     dWF2 = zeros(size(WF2));
     dWC1 = zeros(size(WC1));
     dWC2 = zeros(size(WC2));
@@ -207,7 +199,7 @@ end
 dI1 = z1;
 dI2 = z2;
 
-sys = [dWF1(:);dWC1(:);dWA1(:);dWF2(:);dWC2(:);dWA2(:);dO; ...
+sys = [dWC1(:);dWA1(:);dWF2(:);dWC2(:);dWA2(:);dO; ...
        dalpha1_f;dI1;dI2];
 end
 
@@ -220,7 +212,6 @@ global u_d m Iz lf lr cf0 cf_rate r_delta rho_ff_gain
 
 % ------------------------- 解包状态 --------------------------
 i = 0;
-WF1 = reshape(x(i+1:i+2*N),N,2); i = i+2*N;
 WC1 = reshape(x(i+1:i+2*N),N,2); i = i+2*N;
 WA1 = reshape(x(i+1:i+2*N),N,2); i = i+2*N;
 WF2 = reshape(x(i+1:i+2*N),N,2); i = i+2*N;
@@ -246,9 +237,8 @@ K2 = [k2y;k2phi];
 
 % 第一层 PI 和 RBF
 s1 = z1+K1.*I1;
-S_F1 = AGV_RBF(Z_F,'F');
 S_J1 = AGV_RBF([Z_F;s1],'J');
-F1_hat = WF1'*S_F1;
+F1_hat = zeros(2,1);
 alpha1 = varsigma\(-C1.*s1+Gamma-K1.*z1-F1_hat-0.5*WA1'*S_J1);
 
 dalpha1_f = (alpha1-alpha1_f)/tau_alpha1;
@@ -271,7 +261,7 @@ delta_feedforward = rho_ff_gain*rho_0; % 车辆模型的曲率前馈系数
 delta = delta_feedback+delta_feedforward;
 delta_sat = min(max(delta,-u_d),u_d);
 
-W = norm([WF1(:);WC1(:);WA1(:);WF2(:);WC2(:);WA2(:)]);
+W = norm([WC1(:);WA1(:);WF2(:);WC2(:);WA2(:)]);
 
 % 前三个是控制器主输出，后六个供 plot 记录误差变量。
 sys = [delta;delta_sat;W;s1;s2;z2];

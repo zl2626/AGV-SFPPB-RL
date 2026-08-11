@@ -158,6 +158,8 @@ git commit -m "derive second-layer saturation compensation from z2"
 **Files:**
 - Modify: `AGV_ctrl.m:state layout and first-layer calculations`
 - Modify: `AGV_RBF.m:remove unused F1 basis branch only if no other consumer needs it`
+- Modify: `AGV_learning_ablation.m:weight names and state slices`
+- Modify: `README.md:state order and F1 definition`
 - Test: input/state dimension check and three regression scenarios
 
 **Interfaces:**

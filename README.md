@@ -33,7 +33,7 @@ run('AGV_plot.m');
 run('AGV_learning_ablation.m');
 ```
 
-脚本会比较 `learning_on=true/false`，并打印两种工况的误差、方向盘速率、总变差以及六组权重范数。
+脚本会比较 `learning_on=true/false`，并打印两种工况的误差、方向盘速率、总变差以及五组权重范数。
 
 主模型 `AGV_simulate.slx` 保留 20 s 小曲率基准工况。真正的 U 形路径验证放在 `AGV_simulate_U.slx`：
 
@@ -56,11 +56,11 @@ k1y = 0.10;   k1phi = 0.20;
 k2y = 0.01;   k2phi = 0.01;
 c1y = 5;      c1phi = 35;
 c2y = 5;      c2phi = 8;
-Upsilon1 = 0.04;  Upsilon2 = 0.04;
-sigma1 = 0.08;    sigma2 = 0.08;
+Upsilon2 = 0.04;
+sigma2 = 0.08;
 gamma_c1 = 0.004; gamma_c2 = 0.004;
 gamma_a1 = 0.012; gamma_a2 = 0.012;
-learning_on = true;              % false时冻结六组NN权重
+learning_on = true;              % false时冻结五组NN权重
 u_d = 0.5;
 ```
 
@@ -70,10 +70,10 @@ u_d = 0.5;
 控制器连续状态顺序为
 
 ```text
-[WF1; WC1; WA1; WF2; WC2; WA2; O; alpha1_f; I1; I2]
+[WC1; WA1; WF2; WC2; WA2; O; alpha1_f; I1; I2]
 ```
 
-因此状态数为 `12*N+8`。`alpha1_f` 是虚拟控制的一阶滤波状态，显式给出 `alpha1_f_dot`，PI 状态满足 `I1_dot=z1`、`I2_dot=z2`，并使用 `s1=z1+K1*I1`、`s2=z2+K2*I2`。
+因此状态数为 `10*N+8`。由于 `dot(z1)=varsigma*chi2-Gamma` 已由 NMT 和车辆运动学明确给出，第一层采用 `F1=0`，不再保留没有明确数学定义的 `WF1`。`alpha1_f` 是虚拟控制的一阶滤波状态，显式给出 `alpha1_f_dot`，PI 状态满足 `I1_dot=z1`、`I2_dot=z2`，并使用 `s1=z1+K1*I1`、`s2=z2+K2*I2`。
 
 第二层控制量明确使用 PI 导数项：
 
@@ -143,15 +143,15 @@ U 形工况的记录结果为 `RMS(e_y)=0.03517 m`、`RMS(e_phi)=0.003107 rad`�
 
 ## 文件结构
 
-- `AGV_ctrl.m`：PI、Identifier、Critic、Actor、O 补偿和唯一方向盘控制律。
+- `AGV_ctrl.m`：PI、第二层 Identifier、两层 Critic/Actor、O 补偿和唯一方向盘控制律；第一层已采用 `F1=0`。
 - `AGV_transfor.m`：SFPPB 边界、边界导数、NMT 和 `Gamma`。
 - `assist1.m`：输入饱和补偿状态 `rho`，同时输出经过连续滤波的 `rho_dot` 给 SFPPB。
 - `AGV_plant.m`：标准 `[e_y,e_phi,v_y,omega_z]` 横向动力学模型，输入为已经饱和的 `delta_sat`，并用一阶曲率状态避免代数环。
 - `AGV_plot.m`：时域结果图、`rho` 柔性状态图和 Figure 13 曲线路径图。
-- `AGV_learning_ablation.m`：learning ON/OFF 消融和六组权重范数诊断。
+- `AGV_learning_ablation.m`：learning ON/OFF 消融和五组权重范数诊断。
 - `AGV_simulate.slx`：原模型结构，增加了 PI 诊断记录通道、`rho/rho_dot` 记录通道，并将 `rho_0` 接入车辆参考曲率输入。
 - `AGV_simulate_U.slx`：真正 U 形路径验证模型，使用 70 s 仿真和 180° 半圆参考曲率。
 
 ## 当前验证边界
 
-本轮已完成物理输入、plant 接口、代数环、曲率前馈和诊断结构对齐；名义、压力饱和和 U 形三种仿真均无边界越界。第一层 `WF1` 的理论未知项定义仍需在论文中进一步说明，不能自动解释成严格已知的 `F1`。
+本轮已完成物理输入、plant 接口、代数环、曲率前馈和诊断结构对齐；名义、压力饱和和 U 形三种仿真均无边界越界。第一层采用由 NMT 直接得到的 `F1=0`，完整的双通道 PI-RL composite Lyapunov 证明仍需单独完成并标记为 `THEORY GAP`。
