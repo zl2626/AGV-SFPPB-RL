@@ -82,6 +82,12 @@ F2_PI = F2_hat - alpha1_f_dot + K2.*z2;
 p_a2 = 2*C2.*s2 + 2*F2_PI + WA2'*S_J2;
 ```
 
+实际代码还包含由 `z2=chi2-alpha1_f-O` 推导出的 `+O`：
+
+```matlab
+F2_PI = F2_hat - alpha1_f_dot + O + K2.*z2;
+```
+
 Critic/Actor 不再只把 `s1/s2` 当成完整状态。当前网络输入显式包含 PI 积分状态：
 
 ```text
@@ -172,4 +178,4 @@ U 形工况的记录结果为 `RMS(e_y)=0.03517 m`、`RMS(e_phi)=0.003107 rad`�
 
 ## 当前验证边界
 
-本轮已完成物理输入、plant 接口、代数环、曲率前馈和诊断结构对齐；名义、压力饱和和 U 形三种仿真均无边界越界。第一层采用由 NMT 直接得到的 `F1=0`，完整的双通道 PI-RL composite Lyapunov 证明仍需单独完成并标记为 `THEORY GAP`。
+本轮已完成物理输入、plant 接口、代数环、曲率前馈和诊断结构对齐；名义、压力饱和和 U 形三种仿真均无边界越界。第一层采用由 NMT 直接得到的 `F1=0`。完整的双通道 PI-RL composite Lyapunov 推导、时变边界的 HJB 状态扩展和严格的欠驱动稳定性证明仍标记为 `THEORY GAP`，详见 [`docs/theory/AGV_SFPPB_PI_RL_stability_notes.md`](docs/theory/AGV_SFPPB_PI_RL_stability_notes.md)。
