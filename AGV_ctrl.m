@@ -31,13 +31,13 @@ if isempty(k1phi), k1phi = 0.20; end % 第一层航向误差积分系数
 if isempty(k2y), k2y = 0.01; end   % 第二层横向误差积分系数
 if isempty(k2phi), k2phi = 0.01; end % 第二层航向误差积分系数
 if isempty(tau_alpha1)
-    tau_alpha1 = 0.01;              % 虚拟控制一阶滤波时间常数(s)
+    tau_alpha1 = 0.015;             % 虚拟控制一阶滤波时间常数(s)
 end
 if isempty(vx_vehicle)
     vx_vehicle = 20;                % 纵向速度(m/s)
 end
 if isempty(rho_ff_gain)
-    rho_ff_gain = 4.6;              % 道路曲率前馈系数（当前综合最优）
+    rho_ff_gain = 5.0;              % 道路曲率前馈系数（当前综合最优）
 end
 
 % 两层控制器参数

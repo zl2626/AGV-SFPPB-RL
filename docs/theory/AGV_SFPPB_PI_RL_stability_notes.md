@@ -129,7 +129,7 @@ z_2=\chi_2-\alpha_{1f}-O,
 本工程选用“已知时变输入增益”假设。令
 
 \[
-C(t)=g_\delta(t)=\begin{bmatrix}c_f(t)/m\\l_f c_f(t)/I_z\end{bmatrix},
+g_\delta(t)=\begin{bmatrix}c_f(t)/m\\l_f c_f(t)/I_z\end{bmatrix},
 \]
 
 Controller 和 Plant 使用同一个 \(c_f(t)\) 和 \(g_\delta(t)\)。第二层漂移函数被唯一规定为

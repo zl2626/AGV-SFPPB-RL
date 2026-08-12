@@ -79,18 +79,14 @@ SFPPB 初始边界不对称系数在代码中写作 `nu_y`、`nu_phi`；柔性�
 
 `assist1.m` 的柔性状态参数写作 `k_rho`（衰减系数）和 `k_delta`（饱和超限增益），不再使用含义不清的 `p1/p2`。
 
-第二层控制量明确使用 PI 导数项：
-
-```matlab
-F2_PI = F2_hat - alpha1_f_dot + K2.*z2;
-p_a2 = 2*C2.*s2 + 2*F2_PI + WA2'*Phi_J2;
-```
-
-实际代码还包含由 `z2=chi2-alpha1_f-O` 推导出的 `+O`：
+第二层控制量明确使用 PI 导数项和饱和补偿项：
 
 ```matlab
 F2_PI = F2_hat - alpha1_f_dot + O + K2.*z2;
+p_a2 = 2*C2.*s2 + 2*F2_PI + WA2'*Phi_J2;
 ```
+
+这里的 `+O` 由 `z2=chi2-alpha1_f-O` 直接求导得到。
 
 Critic/Actor 不再只把 `s1/s2` 当成完整状态。当前网络输入显式包含 PI 积分状态：
 
@@ -121,7 +117,7 @@ F2(X,t)  = dot(chi2) - g_delta(t)*delta_sat
 因此 Controller 和 Plant 使用同一个 `cf(t)` 与 `g_delta(t)`。`F2` 包含去掉实际转向输入后的轮胎漂移、外部扰动、道路曲率滤波状态及未建模耦合；`WF2` 只逼近这个 `F2`，不承担 `O`、PI 或虚拟控制滤波项。当前 `Z_F` 是可测的简化回归量；将所有未知参数和完整外部状态纳入严格闭合的 Identifier 仍属于 `THEORY GAP`。
 
 曲线路径的第 13 路输入是 `rho_0`，控制器增加简单的车辆曲率前馈
-`delta_feedforward = rho_ff_gain*rho_0`，当前默认 `rho_ff_gain=4.6`；直线路径时该项为零。
+`delta_feedforward = rho_ff_gain*rho_0`，当前默认 `rho_ff_gain=5.0`；直线路径时该项为零。
 
 控制器输出 `delta` 和唯一一次饱和后的 `delta_sat`，Simulink 将 `delta_sat` 送入 plant，plant 不再重复设置第二个饱和上限。
 
@@ -134,16 +130,16 @@ F2(X,t)  = dot(chi2) - g_delta(t)*delta_sat
 结构审计后的基准工况（`u_d=0.5`，20 s，默认物理扰动）结果为：
 
 ```text
-RMS(e_y)       = 0.0144101 m
-RMS(e_phi)     = 0.00124570 rad
-RMS_delta_dot  = 1.13616 rad/s
-TV_delta       = 1.10411 rad
-T_sat          = 0.000823001 s
+RMS(e_y)       = 0.0142989 m
+RMS(e_phi)     = 0.00125282 rad
+RMS_delta_dot  = 0.407808 rad/s
+TV_delta       = 0.479402 rad
+T_sat          = 0 s
 ```
 
-本轮结构审计没有重新调参，沿用此前综合比较得到的 `rho_ff_gain=4.6`，其余 PI、RL 和饱和补偿参数保持代码顶部默认值。
+本轮在结构审计后重新比较了滤波和曲率前馈参数，当前默认使用 `tau_alpha1=0.015`、`rho_ff_gain=5.0`；其余 PI、RL 和饱和补偿参数保持代码顶部默认值。
 
-饱和验证工况可在 MATLAB 中设置唯一的 `u_d`：
+饱和验证工况可在 MATLAB 中设置唯一的 `u_d`（并按需设置压力扰动）：
 
 ```matlab
 global u_d disturbance_y_amplitude disturbance_phi_amplitude
@@ -153,20 +149,20 @@ disturbance_phi_amplitude = 18;
 out = sim('AGV_simulate','StopTime','20','ReturnWorkspaceOutputs','on');
 ```
 
-恢复默认工况时执行 `clear global u_d` 后重新运行。
+恢复默认工况时执行 `clear global u_d disturbance_y_amplitude disturbance_phi_amplitude` 后重新运行。
 
 这是单独的压力测试背景：两个扰动数值虽然都写成 18，但在代码中分别对应 `m/s^2` 和 `rad/s^2`，默认工况不会使用它们。
-当前 `u_d=0.3` 压力测试完整通过，结构审计后的饱和持续约 `1.29587 s`，结果图为 `fig3/sfppb_pi_sat03_01~13`。
+当前 `u_d=0.3` 压力测试完整通过，结构审计后的饱和持续约 `1.36065 s`，结果图为 `fig3/sfppb_pi_sat03_01~13`。
 
 ```text
 结果状态          = Pass（无 BoundaryViolation）
-RMS(e_y)          ≈ 0.151699 m
-RMS(e_phi)        ≈ 0.0151624 rad
-T_sat             ≈ 1.29587 s
+RMS(e_y)          ≈ 0.0927116 m
+RMS(e_phi)        ≈ 0.0129173 rad
+T_sat             ≈ 1.36065 s
 min boundary gap  ≈ 0.0782158
 ```
 
-U 形工况的记录结果为 `RMS(e_y)=0.0243406 m`、`RMS(e_phi)=0.00160504 rad`、`T_sat≈0.000823001 s`，无边界越界；Figure 13 中红色虚线是参考半圆，蓝色实线是实际 AGV 轨迹。
+U 形工况的记录结果为 `RMS(e_y)=0.0243367 m`、`RMS(e_phi)=0.00160697 rad`、`T_sat=0 s`，无边界越界；Figure 13 中红色虚线是参考半圆，蓝色实线是实际 AGV 轨迹。
 
 默认代码已恢复为 `u_d=0.5`。`AGV_plot.m` 的 Figure 12 现在绘制真正的柔性辅助状态 `rho`，Figure 10 单独绘制道路曲率 `rho_0`。
 
