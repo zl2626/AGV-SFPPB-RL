@@ -159,7 +159,7 @@ out = sim('AGV_simulate','StopTime','20','ReturnWorkspaceOutputs','on');
 RMS(e_y)          ≈ 0.0927116 m
 RMS(e_phi)        ≈ 0.0129173 rad
 T_sat             ≈ 1.36065 s
-min boundary gap  ≈ 0.0782158
+min boundary gap  ≈ 0.0781755
 ```
 
 U 形工况的记录结果为 `RMS(e_y)=0.0243367 m`、`RMS(e_phi)=0.00160697 rad`、`T_sat=0 s`，无边界越界；Figure 13 中红色虚线是参考半圆，蓝色实线是实际 AGV 轨迹。

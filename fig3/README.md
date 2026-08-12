@@ -6,4 +6,4 @@
 
 所有图均由当前目录下的 `AGV_plot.m` 生成，Reference 为红色虚线，Actual AGV path 为蓝色实线；本轮采用 `tau_alpha1=0.015`、`rho_ff_gain=5.0`，旧版失败图已删除。
 
-当前审计结果：nominal `RMS(e_y)=0.0142989 m`、`RMS(e_phi)=0.00125282 rad`；压力工况 `RMS(e_y)=0.0927116 m`、`RMS(e_phi)=0.0129173 rad`；U 形工况 `RMS(e_y)=0.0243367 m`、`RMS(e_phi)=0.00160697 rad`。三组均无 `BoundaryViolation`、NaN 或 Inf。
+当前审计结果：nominal `RMS(e_y)=0.0142989 m`、`RMS(e_phi)=0.00125282 rad`；压力工况 `RMS(e_y)=0.0927116 m`、`RMS(e_phi)=0.0129173 rad`；U 形工况 `RMS(e_y)=0.0243367 m`、`RMS(e_phi)=0.00160697 rad`。三组均无 `BoundaryViolation`、NaN 或 Inf，压力工况最小边界间隙约 `0.0781755`。
