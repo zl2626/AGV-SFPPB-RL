@@ -18,17 +18,17 @@ end
 end
 
 function [sys,x0,str,ts] = mdlInitializeSizes
-global u_d p1 p2 rho_filter_tau
+global u_d k_rho k_delta rho_filter_tau
 
 % u_d 由 AGV_ctrl.m 统一设置；直接运行 assist1 时才使用默认值。
 if isempty(u_d)
     u_d = 0.5;
 end
-if isempty(p1)
-    p1 = 2;                         % rho 衰减系数
+if isempty(k_rho)
+    k_rho = 2;                      % rho 衰减系数
 end
-if isempty(p2)
-    p2 = 5;                         % 饱和超限增益
+if isempty(k_delta)
+    k_delta = 5;                    % 饱和超限增益
 end
 if isempty(rho_filter_tau)
     rho_filter_tau = 0.02;          % rho_dot 滤波时间常数(s)
@@ -48,7 +48,7 @@ ts = [0 0];
 end
 
 function sys = mdlDerivatives(~,x,u)
-global u_d p1 p2 rho_filter_tau
+global u_d k_rho k_delta rho_filter_tau
 
 % 两层连续状态：先得到饱和驱动的指令 rho_c，再滤波得到 rho。
 rho_c = max(x(1),0);
@@ -59,7 +59,7 @@ delta = u(1);
 varpi1 = (sign(delta-u_d)+1)*(delta-u_d);
 varpi2 = (sign(delta+u_d)-1)*(delta+u_d);
 
-rho_c_dot = -p1*rho_c+p2*(varpi1+varpi2);
+rho_c_dot = -k_rho*rho_c+k_delta*(varpi1+varpi2);
 if x(1) <= 0 && rho_c_dot < 0
     rho_c_dot = 0;
 end

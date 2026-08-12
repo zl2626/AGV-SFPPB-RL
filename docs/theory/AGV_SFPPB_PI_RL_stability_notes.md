@@ -35,7 +35,7 @@ x_p=[e_y,e_\phi,v_y,\omega_z,\rho_0^f]^T,
 \begin{aligned}
 \varpi_+&=(\operatorname{sign}(\delta-u_d)+1)(\delta-u_d),\\
 \varpi_-&=(\operatorname{sign}(\delta+u_d)-1)(\delta+u_d),\\
-\dot\rho_c&=-p_1\rho_c+p_2(\varpi_++\varpi_-),\\
+\dot\rho_c&=-k_\rho\rho_c+k_\delta(\varpi_++\varpi_-),\\
 \dot\rho&=(\rho_c-\rho)/\tau_\rho.
 \end{aligned}
 \]

@@ -77,6 +77,8 @@ u_d = 0.5;
 
 SFPPB 初始边界不对称系数在代码中写作 `nu_y`、`nu_phi`；柔性放宽状态只写作 `rho`，两者不混用。边界放宽系数写作 `lambda_lower_y/lambda_upper_y` 和 `lambda_lower_phi/lambda_upper_phi`，分别对应下界和上界。
 
+`assist1.m` 的柔性状态参数写作 `k_rho`（衰减系数）和 `k_delta`（饱和超限增益），不再使用含义不清的 `p1/p2`。
+
 第二层控制量明确使用 PI 导数项：
 
 ```matlab
