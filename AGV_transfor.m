@@ -1,7 +1,7 @@
 function [sys,x0,str,ts] = AGV_transfor(t,~,u,flag)
 % AGV_TRANSFOR  SFPPB性能边界和NMT变换
 % 只做：
-%   kappa(t) -> S(t) -> SFPPB -> NMT -> z1和Gamma
+%   kappa(t) -> shift(t) -> SFPPB -> NMT -> z1和Gamma
 % 不保留PI、不在这里写控制律。
 
 switch flag
@@ -86,56 +86,56 @@ if t < T_y
     q_y = sin(pi*t/(2*T_y));
     q_dot_y = pi/(2*T_y)*cos(pi*t/(2*T_y));
     kappa_y = kappa0_y+(kappaT_y-kappa0_y)*q_y^l_kappa_y;
-    S_y = (1-q_y)^l_s_y;
+    shift_y = (1-q_y)^l_s_y;
     kappa_dot_y = (kappaT_y-kappa0_y)*l_kappa_y* ...
         q_y^(l_kappa_y-1)*q_dot_y;
-    S_dot_y = -l_s_y*(1-q_y)^(l_s_y-1)*q_dot_y;
+    shift_dot_y = -l_s_y*(1-q_y)^(l_s_y-1)*q_dot_y;
 else
     kappa_y = kappaT_y;
-    S_y = 0;
+    shift_y = 0;
     kappa_dot_y = 0;
-    S_dot_y = 0;
+    shift_dot_y = 0;
 end
 
 if t < T_phi
     q_phi = sin(pi*t/(2*T_phi));
     q_dot_phi = pi/(2*T_phi)*cos(pi*t/(2*T_phi));
     kappa_phi = kappa0_phi+(kappaT_phi-kappa0_phi)*q_phi^l_kappa_phi;
-    S_phi = (1-q_phi)^l_s_phi;
+    shift_phi = (1-q_phi)^l_s_phi;
     kappa_dot_phi = (kappaT_phi-kappa0_phi)*l_kappa_phi* ...
         q_phi^(l_kappa_phi-1)*q_dot_phi;
-    S_dot_phi = -l_s_phi*(1-q_phi)^(l_s_phi-1)*q_dot_phi;
+    shift_dot_phi = -l_s_phi*(1-q_phi)^(l_s_phi-1)*q_dot_phi;
 else
     kappa_phi = kappaT_phi;
-    S_phi = 0;
+    shift_phi = 0;
     kappa_dot_phi = 0;
-    S_dot_phi = 0;
+    shift_dot_phi = 0;
 end
 
 % -------------------- 名义边界和柔性边界 --------------------
 % 根据实际初始误差方向选择初始性能边界。
 if e0_y0 < 0
-    B_under_y0 = -kappa_y+e0_y0*S_y;
-    B_bar_y0 = nu_y*kappa_y+e0_y0*S_y;
-    B_under_y0_dot = -kappa_dot_y+e0_y0*S_dot_y;
-    B_bar_y0_dot = nu_y*kappa_dot_y+e0_y0*S_dot_y;
+    B_under_y0 = -kappa_y+e0_y0*shift_y;
+    B_bar_y0 = nu_y*kappa_y+e0_y0*shift_y;
+    B_under_y0_dot = -kappa_dot_y+e0_y0*shift_dot_y;
+    B_bar_y0_dot = nu_y*kappa_dot_y+e0_y0*shift_dot_y;
 else
-    B_under_y0 = -nu_y*kappa_y+e0_y0*S_y;
-    B_bar_y0 = kappa_y+e0_y0*S_y;
-    B_under_y0_dot = -nu_y*kappa_dot_y+e0_y0*S_dot_y;
-    B_bar_y0_dot = kappa_dot_y+e0_y0*S_dot_y;
+    B_under_y0 = -nu_y*kappa_y+e0_y0*shift_y;
+    B_bar_y0 = kappa_y+e0_y0*shift_y;
+    B_under_y0_dot = -nu_y*kappa_dot_y+e0_y0*shift_dot_y;
+    B_bar_y0_dot = kappa_dot_y+e0_y0*shift_dot_y;
 end
 
 if e0_phi0 < 0
-    B_under_phi0 = -kappa_phi+e0_phi0*S_phi;
-    B_bar_phi0 = nu_phi*kappa_phi+e0_phi0*S_phi;
-    B_under_phi0_dot = -kappa_dot_phi+e0_phi0*S_dot_phi;
-    B_bar_phi0_dot = nu_phi*kappa_dot_phi+e0_phi0*S_dot_phi;
+    B_under_phi0 = -kappa_phi+e0_phi0*shift_phi;
+    B_bar_phi0 = nu_phi*kappa_phi+e0_phi0*shift_phi;
+    B_under_phi0_dot = -kappa_dot_phi+e0_phi0*shift_dot_phi;
+    B_bar_phi0_dot = nu_phi*kappa_dot_phi+e0_phi0*shift_dot_phi;
 else
-    B_under_phi0 = -nu_phi*kappa_phi+e0_phi0*S_phi;
-    B_bar_phi0 = kappa_phi+e0_phi0*S_phi;
-    B_under_phi0_dot = -nu_phi*kappa_dot_phi+e0_phi0*S_dot_phi;
-    B_bar_phi0_dot = kappa_dot_phi+e0_phi0*S_dot_phi;
+    B_under_phi0 = -nu_phi*kappa_phi+e0_phi0*shift_phi;
+    B_bar_phi0 = kappa_phi+e0_phi0*shift_phi;
+    B_under_phi0_dot = -nu_phi*kappa_dot_phi+e0_phi0*shift_dot_phi;
+    B_bar_phi0_dot = kappa_dot_phi+e0_phi0*shift_dot_phi;
 end
 
 B_under_y = B_under_y0-lambda_lower_y*tanh(rho);

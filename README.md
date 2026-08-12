@@ -83,7 +83,7 @@ SFPPB 初始边界不对称系数在代码中写作 `nu_y`、`nu_phi`；柔性�
 
 ```matlab
 F2_PI = F2_hat - alpha1_f_dot + K2.*z2;
-p_a2 = 2*C2.*s2 + 2*F2_PI + WA2'*S_J2;
+p_a2 = 2*C2.*s2 + 2*F2_PI + WA2'*Phi_J2;
 ```
 
 实际代码还包含由 `z2=chi2-alpha1_f-O` 推导出的 `+O`：
@@ -107,19 +107,19 @@ Z_J2 = [Z_F; z1; I1; z2; I2; O; alpha1_f]
 
 ```matlab
 C_physical = [cf/m; lf*cf/Iz];
-C = C_physical;
+g_delta = C_physical;
 r_delta = norm([cf0/m; lf*cf0/Iz]);
-delta = -(C'*p_a2)/(2*r_delta);
+delta = -(g_delta'*p_a2)/(2*r_delta);
 ```
 
 本工程明确采用“已知时变输入增益”假设：
 
 ```text
-dot(chi2) = F2(X,t) + C(t)*delta_sat
-F2(X,t)  = dot(chi2) - C(t)*delta_sat
+dot(chi2) = F2(X,t) + g_delta(t)*delta_sat
+F2(X,t)  = dot(chi2) - g_delta(t)*delta_sat
 ```
 
-因此 Controller 和 Plant 使用同一个 `cf(t)` 与 `C(t)`。`F2` 包含去掉实际转向输入后的轮胎漂移、外部扰动、道路曲率滤波状态及未建模耦合；`WF2` 只逼近这个 `F2`，不承担 `O`、PI 或虚拟控制滤波项。当前 `Z_F` 是可测的简化回归量；将所有未知参数和完整外部状态纳入严格闭合的 Identifier 仍属于 `THEORY GAP`。
+因此 Controller 和 Plant 使用同一个 `cf(t)` 与 `g_delta(t)`。`F2` 包含去掉实际转向输入后的轮胎漂移、外部扰动、道路曲率滤波状态及未建模耦合；`WF2` 只逼近这个 `F2`，不承担 `O`、PI 或虚拟控制滤波项。当前 `Z_F` 是可测的简化回归量；将所有未知参数和完整外部状态纳入严格闭合的 Identifier 仍属于 `THEORY GAP`。
 
 曲线路径的第 13 路输入是 `rho_0`，控制器增加简单的车辆曲率前馈
 `delta_feedforward = rho_ff_gain*rho_0`，当前默认 `rho_ff_gain=4.6`；直线路径时该项为零。

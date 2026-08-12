@@ -129,16 +129,16 @@ z_2=\chi_2-\alpha_{1f}-O,
 本工程选用“已知时变输入增益”假设。令
 
 \[
-C(t)=\begin{bmatrix}c_f(t)/m\\l_f c_f(t)/I_z\end{bmatrix},
+C(t)=g_\delta(t)=\begin{bmatrix}c_f(t)/m\\l_f c_f(t)/I_z\end{bmatrix},
 \]
 
-Controller 和 Plant 使用同一个 \(c_f(t)\) 和 \(C(t)\)。第二层漂移函数被唯一规定为
+Controller 和 Plant 使用同一个 \(c_f(t)\) 和 \(g_\delta(t)\)。第二层漂移函数被唯一规定为
 
 \[
-\boxed{F_2(X,t):=\dot\chi_2-C(t)\delta_{\rm sat}}.
+\boxed{F_2(X,t):=\dot\chi_2-g_\delta(t)\delta_{\rm sat}}.
 \]
 
-因此 \(F_2\) 包含去掉实际转向输入后的轮胎漂移、后轮参数影响、外部扰动、曲率滤波状态引起的耦合和未建模项；已知的 \(C(t)\delta_{\rm sat}\) 不属于 Identifier 的目标。`WF2` 只逼近 \(F_2\)：
+因此 \(F_2\) 包含去掉实际转向输入后的轮胎漂移、后轮参数影响、外部扰动、曲率滤波状态引起的耦合和未建模项；已知的 \(g_\delta(t)\delta_{\rm sat}\) 不属于 Identifier 的目标。`WF2` 只逼近 \(F_2\)：
 
 \[
 \hat F_2=\hat W_{F2}^{T}\Phi_F(Z_F).
@@ -147,7 +147,7 @@ Controller 和 Plant 使用同一个 \(c_f(t)\) 和 \(C(t)\)。第二层漂移�
 饱和辅助状态的实现为
 
 \[
-\dot O=-O+C(t)(\delta_{\rm sat}-\delta).
+\dot O=-O+g_\delta(t)(\delta_{\rm sat}-\delta).
 \]
 
 由定义直接得到
@@ -156,7 +156,7 @@ Controller 和 Plant 使用同一个 \(c_f(t)\) 和 \(C(t)\)。第二层漂移�
 \begin{aligned}
 \dot z_2
  &=\dot\chi_2-\dot\alpha_{1f}-\dot O\\
- &=F_2+C\delta-\dot\alpha_{1f}+O.
+ &=F_2+g_\delta\delta-\dot\alpha_{1f}+O.
 \end{aligned}
 \]
 
@@ -172,7 +172,7 @@ F_{2,\mathrm{PI}}=\hat F_2-\dot\alpha_{1f}+O+K_2z_2,
 p_{a2}=2C_2\xi_2+2F_{2,\mathrm{PI}}
  +\hat W_{a2}^{T}\Phi_{J2},
 \qquad
-\delta_{\rm fb}=-\frac{C^Tp_{a2}}{2r_\delta}.
+\delta_{\rm fb}=-\frac{g_\delta^Tp_{a2}}{2r_\delta}.
 \]
 
 最终请求为 \(\delta=\delta_{\rm fb}+\delta_{\rm ff}\)，其中当前代码的 \(\delta_{\rm ff}=\texttt{rho\_ff\_gain}\,\rho_0\)。
@@ -206,7 +206,7 @@ V=\tfrac12\|\xi_1\|^2+\tfrac12\|\xi_2\|^2
 
 必须逐项处理：
 
-1. \(C(t)\) 的时变性和单输入投影 \(C^Tp_{a2}\)；
+1. \(g_\delta(t)\) 的时变性和单输入投影 \(g_\delta^Tp_{a2}\)；
 2. \(\xi_1,\xi_2\) 的 PI 交叉项；
 3. \(\dot O\) 与饱和误差的抵消；
 4. \(\alpha_{1f}-\alpha_1\) 的滤波误差；

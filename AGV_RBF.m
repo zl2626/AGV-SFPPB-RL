@@ -1,9 +1,9 @@
-function S = AGV_RBF(Z,type)
+function Phi = AGV_RBF(Z,type)
 % AGV_RBF  论文中的普通Gaussian RBF基函数
 % F网络输入：Z_F=[e_y,e_phi,de_y,de_phi]
 % J1网络输入：Z_J1=[Z_F;z1;I1]
 % J2网络输入：Z_J2=[Z_F;z1;I1;z2;I2;O;alpha1_f]
-% 公式：S_j(Z)=exp(-(Z-c_j)'(Z-c_j)/a^2)
+% 公式：Phi_j(Z)=exp(-(Z-c_j)'(Z-c_j)/a^2)
 
 if nargin < 2
     type = 'F';
@@ -49,8 +49,8 @@ end
 
 Z = Z./scale;
 c = c./scale;
-S = zeros(N,1);
+Phi = zeros(N,1);
 for j = 1:N
     d = Z-c(:,j);
-    S(j) = exp(-(d'*d)/(a^2));
+    Phi(j) = exp(-(d'*d)/(a^2));
 end
