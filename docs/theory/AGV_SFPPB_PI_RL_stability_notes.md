@@ -15,13 +15,13 @@ x_p=[e_y,e_\phi,v_y,\omega_z,\rho_0^f]^T,
 \[
 \begin{aligned}
 \dot e_y&=v_y+v_xe_\phi,\\
-\dot e_\phi&=\omega_z-v_x\rho_0,\\
+\dot e_\phi&=\omega_z-v_x\rho_0^f,\\
 \dot v_y&=A_{11}v_y+A_{12}\omega_z+B_1\delta_{\rm sat}+d_y,\\
 \dot\omega_z&=A_{21}v_y+A_{22}\omega_z+B_2\delta_{\rm sat}+d_\phi.
 \end{aligned}
 \]
 
-道路曲率只进入误差运动学和 \(\rho_0^f\) 的一阶滤波，不再作为额外项重复加入 \(\dot v_y\) 或 \(\dot\omega_z\)。控制器输出未饱和请求 \(\delta\)，唯一执行输入为
+道路曲率先经过 \(\rho_0^f\) 的一阶滤波，再进入误差运动学；同一个 \(\rho_0^f\) 也用于 Plant 输出给 SFPPB/Controller 的 \(\dot e_\phi\)。它不作为额外项重复加入 \(\dot v_y\) 或 \(\dot\omega_z\)。控制器输出未饱和请求 \(\delta\)，唯一执行输入为
 
 \[
 \delta_{\rm sat}=\operatorname{sat}(\delta,-u_d,u_d).
@@ -47,6 +47,8 @@ x_p=[e_y,e_\phi,v_y,\omega_z,\rho_0^f]^T,
 \qquad
 \overline B_i=B_{i0}^+ +\lambda_i^+\tanh\rho,
 \]
+
+边界初始宽度的不对称系数使用 \(\nu_y,\nu_\phi\)，不再使用与柔性状态容易混淆的 \(\eta\)。
 
 并使用
 
