@@ -77,7 +77,7 @@ u_d = 0.5;
 
 SFPPB 初始边界不对称系数在代码中写作 `nu_y`、`nu_phi`；柔性放宽状态只写作 `rho`，两者不混用。边界放宽系数写作 `lambda_lower_y/lambda_upper_y` 和 `lambda_lower_phi/lambda_upper_phi`，分别对应下界和上界。
 
-`assist1.m` 的柔性状态参数写作 `k_rho`（衰减系数）和 `k_delta`（饱和超限增益），不再使用含义不清的 `p1/p2`。
+`assist1.m` 的柔性状态参数写作 `k_rho=2`（衰减系数）、`k_delta=4`（饱和超限增益）和 `rho_filter_tau=0.02 s`（平滑时间常数），不再使用含义不清的 `p1/p2`。
 
 第二层控制量明确使用 PI 导数项和饱和补偿项：
 
@@ -137,7 +137,7 @@ TV_delta       = 0.479402 rad
 T_sat          = 0 s
 ```
 
-本轮在结构审计后重新比较了滤波和曲率前馈参数，当前默认使用 `tau_alpha1=0.015`、`rho_ff_gain=5.0`；其余 PI、RL 和饱和补偿参数保持代码顶部默认值。
+本轮在结构审计后重新比较了柔性边界、滤波和曲率前馈参数，当前默认使用 `k_rho=2`、`k_delta=4`、`rho_filter_tau=0.02 s`、`tau_alpha1=0.015`、`rho_ff_gain=5.0`；其余 PI、RL 和饱和补偿参数保持代码顶部默认值。
 
 饱和验证工况可在 MATLAB 中设置唯一的 `u_d`（并按需设置压力扰动）：
 
@@ -152,14 +152,14 @@ out = sim('AGV_simulate','StopTime','20','ReturnWorkspaceOutputs','on');
 恢复默认工况时执行 `clear global u_d disturbance_y_amplitude disturbance_phi_amplitude` 后重新运行。
 
 这是单独的压力测试背景：两个扰动数值虽然都写成 18，但在代码中分别对应 `m/s^2` 和 `rad/s^2`，默认工况不会使用它们。
-当前 `u_d=0.3` 压力测试完整通过，结构审计后的饱和持续约 `1.36065 s`，结果图为 `fig3/sfppb_pi_sat03_01~13`。
+当前 `u_d=0.3` 压力测试完整通过，参数优化后的饱和持续约 `1.31722 s`，结果图为 `fig3/sfppb_pi_sat03_01~13`。
 
 ```text
 结果状态          = Pass（无 BoundaryViolation）
-RMS(e_y)          ≈ 0.0927116 m
-RMS(e_phi)        ≈ 0.0129173 rad
-T_sat             ≈ 1.36065 s
-min boundary gap  ≈ 0.0781755
+RMS(e_y)          ≈ 0.0833626 m
+RMS(e_phi)        ≈ 0.00987371 rad
+T_sat             ≈ 1.31722 s
+min boundary gap  ≈ 0.0781679
 ```
 
 U 形工况的记录结果为 `RMS(e_y)=0.0243367 m`、`RMS(e_phi)=0.00160697 rad`、`T_sat=0 s`，无边界越界；Figure 13 中红色虚线是参考半圆，蓝色实线是实际 AGV 轨迹。

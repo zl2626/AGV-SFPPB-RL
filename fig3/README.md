@@ -1,9 +1,9 @@
 # fig3 结果说明
 
 - `sfppb_pi_01~13`：当前默认物理扰动下的 nominal 工况结果，`u_d=0.5`，20 s。
-- `sfppb_pi_sat03_01~13`：`u_d=0.3` 压力饱和工况结果；该组运行时显式设置横向/航向扰动幅值为 18，结构审计后的饱和持续约 1.36065 s。
+- `sfppb_pi_sat03_01~13`：`u_d=0.3` 压力饱和工况结果；该组运行时显式设置横向/航向扰动幅值为 18，参数优化后的饱和持续约 1.31722 s。
 - `sfppb_pi_u_01~13`：当前 U 形工况结果，`v_x=20 m/s`、`rho_0=0.003 1/m`，10~62.36 s 为半圆曲率，总时长 70 s。
 
 所有图均由当前目录下的 `AGV_plot.m` 生成，Reference 为红色虚线，Actual AGV path 为蓝色实线；本轮采用 `tau_alpha1=0.015`、`rho_ff_gain=5.0`，旧版失败图已删除。
 
-当前审计结果：nominal `RMS(e_y)=0.0142989 m`、`RMS(e_phi)=0.00125282 rad`；压力工况 `RMS(e_y)=0.0927116 m`、`RMS(e_phi)=0.0129173 rad`；U 形工况 `RMS(e_y)=0.0243367 m`、`RMS(e_phi)=0.00160697 rad`。三组均无 `BoundaryViolation`、NaN 或 Inf，压力工况最小边界间隙约 `0.0781755`。
+当前审计结果：nominal `RMS(e_y)=0.0142989 m`、`RMS(e_phi)=0.00125282 rad`；压力工况 `RMS(e_y)=0.0833626 m`、`RMS(e_phi)=0.00987371 rad`；U 形工况 `RMS(e_y)=0.0243367 m`、`RMS(e_phi)=0.00160697 rad`。三组均无 `BoundaryViolation`、NaN 或 Inf，压力工况最小边界间隙约 `0.0781679`。

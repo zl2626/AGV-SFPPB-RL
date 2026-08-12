@@ -28,7 +28,7 @@ if isempty(k_rho)
     k_rho = 2;                      % rho 衰减系数
 end
 if isempty(k_delta)
-    k_delta = 5;                    % 饱和超限增益
+    k_delta = 4;                    % 饱和超限增益
 end
 if isempty(rho_filter_tau)
     rho_filter_tau = 0.02;          % rho_dot 滤波时间常数(s)
