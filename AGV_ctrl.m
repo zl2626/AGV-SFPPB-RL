@@ -173,8 +173,7 @@ F2_PI = F2_hat-dalpha1_f+O+K2.*z2;
 
 % 已知时变输入增益：Controller 与 Plant 使用同一个 cf(t) 和 g_delta(t)。
 cf = cf0*(1+cf_rate*sin(0.01*t));
-C_physical = [cf/m;lf*cf/Iz];
-g_delta = C_physical;
+g_delta = [cf/m;lf*cf/Iz];
 
 % 方向盘控制量和输入饱和补偿状态
 p_a2 = 2*C2.*s2+2*F2_PI+WA2'*Phi_J2;
@@ -261,8 +260,7 @@ F2_PI = F2_hat-dalpha1_f+O+K2.*z2;
 
 % 车辆真实输入增益和最终控制量
 cf = cf0*(1+cf_rate*sin(0.01*t));
-C_physical = [cf/m;lf*cf/Iz];
-g_delta = C_physical;
+g_delta = [cf/m;lf*cf/Iz];
 p_a2 = 2*C2.*s2+2*F2_PI+WA2'*Phi_J2;
 delta_feedback = -(g_delta'*p_a2)/(2*r_delta);
 delta_feedforward = rho_ff_gain*rho_0; % 车辆模型的曲率前馈系数

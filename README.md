@@ -106,8 +106,7 @@ Z_J2 = [Z_F; z1; I1; z2; I2; O; alpha1_f]
 `AGV_ctrl.m` 和 `AGV_plant.m` 使用同一个物理输入增益：
 
 ```matlab
-C_physical = [cf/m; lf*cf/Iz];
-g_delta = C_physical;
+g_delta = [cf/m; lf*cf/Iz];
 r_delta = norm([cf0/m; lf*cf0/Iz]);
 delta = -(g_delta'*p_a2)/(2*r_delta);
 ```
