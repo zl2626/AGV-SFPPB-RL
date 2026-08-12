@@ -22,10 +22,10 @@ function [sys,x0,str,ts] = mdlInitializeSizes
 % ========================== SFPPB参数 ==========================
 % 横向误差 y
 global kappa0_y kappaT_y T_y l_kappa_y l_s_y nu_y
-global lambda1_y lambda2_y
+global lambda_lower_y lambda_upper_y
 % 航向误差 phi
 global kappa0_phi kappaT_phi T_phi l_kappa_phi l_s_phi nu_phi
-global lambda1_phi lambda2_phi
+global lambda_lower_phi lambda_upper_phi
 global nmt_margin
 
 kappa0_y = 0.28;                 % kappa_y(0)
@@ -34,8 +34,8 @@ T_y = 5;
 l_kappa_y = 1;
 l_s_y = 1;
 nu_y = 1;                         % 横向边界不对称系数
-if isempty(lambda1_y), lambda1_y = 1.00; end
-if isempty(lambda2_y), lambda2_y = 1.00; end
+if isempty(lambda_lower_y), lambda_lower_y = 1.00; end
+if isempty(lambda_upper_y), lambda_upper_y = 1.00; end
 
 kappa0_phi = 0.10;               % kappa_phi(0)
 kappaT_phi = 0.08;               % kappa_phi(T)
@@ -43,8 +43,8 @@ T_phi = 5;
 l_kappa_phi = 1;
 l_s_phi = 1;
 nu_phi = 1;                       % 航向边界不对称系数
-if isempty(lambda1_phi), lambda1_phi = 0.80; end
-if isempty(lambda2_phi), lambda2_phi = 0.80; end
+if isempty(lambda_lower_phi), lambda_lower_phi = 0.80; end
+if isempty(lambda_upper_phi), lambda_upper_phi = 0.80; end
 
 nmt_margin = 1e-10;              % 只避免浮点数把点判到端点
 
@@ -63,9 +63,9 @@ end
 
 function sys = mdlOutputs(t,u)
 global kappa0_y kappaT_y T_y l_kappa_y l_s_y nu_y
-global lambda1_y lambda2_y
+global lambda_lower_y lambda_upper_y
 global kappa0_phi kappaT_phi T_phi l_kappa_phi l_s_phi nu_phi
-global lambda1_phi lambda2_phi nmt_margin
+global lambda_lower_phi lambda_upper_phi nmt_margin
 
 persistent e0_y0 e0_phi0
 
@@ -138,17 +138,17 @@ else
     B_bar_phi0_dot = kappa_dot_phi+e0_phi0*S_dot_phi;
 end
 
-B_under_y = B_under_y0-lambda1_y*tanh(rho);
-B_bar_y = B_bar_y0+lambda2_y*tanh(rho);
-B_under_phi = B_under_phi0-lambda1_phi*tanh(rho);
-B_bar_phi = B_bar_phi0+lambda2_phi*tanh(rho);
+B_under_y = B_under_y0-lambda_lower_y*tanh(rho);
+B_bar_y = B_bar_y0+lambda_upper_y*tanh(rho);
+B_under_phi = B_under_phi0-lambda_lower_phi*tanh(rho);
+B_bar_phi = B_bar_phi0+lambda_upper_phi*tanh(rho);
 
 % 柔性边界导数：tanh'(rho)=1-tanh(rho)^2。
 sech2_rho = 1-tanh(rho)^2;
-B_under_y_dot = B_under_y0_dot-lambda1_y*sech2_rho*rho_dot_now;
-B_bar_y_dot = B_bar_y0_dot+lambda2_y*sech2_rho*rho_dot_now;
-B_under_phi_dot = B_under_phi0_dot-lambda1_phi*sech2_rho*rho_dot_now;
-B_bar_phi_dot = B_bar_phi0_dot+lambda2_phi*sech2_rho*rho_dot_now;
+B_under_y_dot = B_under_y0_dot-lambda_lower_y*sech2_rho*rho_dot_now;
+B_bar_y_dot = B_bar_y0_dot+lambda_upper_y*sech2_rho*rho_dot_now;
+B_under_phi_dot = B_under_phi0_dot-lambda_lower_phi*sech2_rho*rho_dot_now;
+B_bar_phi_dot = B_bar_phi0_dot+lambda_upper_phi*sech2_rho*rho_dot_now;
 
 % NMT中的已知边界变化项：Gamma=B_bar_dot/(B_bar-e)
 %                         +B_under_dot/(e-B_under)。

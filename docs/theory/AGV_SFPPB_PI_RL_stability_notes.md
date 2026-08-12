@@ -48,6 +48,8 @@ x_p=[e_y,e_\phi,v_y,\omega_z,\rho_0^f]^T,
 \overline B_i=B_{i0}^+ +\lambda_i^+\tanh\rho,
 \]
 
+代码变量 `lambda_lower_*` 与 `lambda_upper_*` 分别对应公式中的 \(\lambda_i^-\) 与 \(\lambda_i^+\)。
+
 边界初始宽度的不对称系数使用 \(\nu_y,\nu_\phi\)，不再使用与柔性状态容易混淆的 \(\eta\)。
 
 并使用
